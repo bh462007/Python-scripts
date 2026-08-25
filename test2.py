@@ -47,9 +47,9 @@ pipeline_run=[instance1, instance2, instance3]
 def summarize_pipeline(results):
     for agent in results:
         if agent.success:
-            print(f"{agent.agent_name}({agent.role}): OK")
+            print(f"[{agent.agent_name}] ({agent.role}): OK")
         else:
-            print(f"{agent.agent_name}({agent.role}): Failed- {len(agent.errors)} erros(s)")
+            print(f"[{agent.agent_name}] ({agent.role}): Failed - {len(agent.errors)} errors(s)")
 
 # 4. Call summarize_pipeline(pipeline_run)
 r=summarize_pipeline(pipeline_run)
