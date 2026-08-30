@@ -14,8 +14,10 @@ def register():
         password=request.form["password"]
         hash_password=generate_password_hash(password)
 
+        conn=sqlite3.connect("users.db")
+
         try: 
-            conn=sqlite3.connect("users.db")
+            
             cursor=conn.cursor()
 
             cursor.execute("INSERT INTO users(username, password_hash) VALUES(?, ?)", (username, hash_password))
@@ -30,9 +32,36 @@ def register():
         finally: 
             conn.close()
 
+    return render_template("register.html")
+
+@app.route("/login", methods=["POST","GET"])
+def login():
+    if request.method=="POST":
+        username=request.form.get("username")
+        password=request.form.get("password")
+
+        conn=sqlite3.connect("users.db")
+        cursor=conn.cursor()
+
+        cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+        user = cursor.fetchone()
+
+        conn.close()
+
+        if user_record:
+            stored_hash=user[2]
+
+
+            if check_password_hash(stored_hash,  password):
+                return f"welcome back, {user}! login successfully"
+            else:
+                return "Invalid password"
+            
+        else:
+            return "user not found"
+    return render_template("login.html")
         
 
-    return render_template("register.html")
 
 if __name__=="__main__":
     app.run(debug=True)
