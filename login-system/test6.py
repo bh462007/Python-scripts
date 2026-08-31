@@ -1,7 +1,14 @@
 from flask import Flask, render_template, request
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
+
+import os
+
 app=Flask(__name__)
+
+
+print("Current folder:", os.getcwd())
+print("Database path:", os.path.abspath("users.db"))
 
 @app.route("/")
 def home():
@@ -48,7 +55,7 @@ def login():
 
         conn.close()
 
-        if user_record:
+        if user:
             stored_hash=user[2]
 
 
