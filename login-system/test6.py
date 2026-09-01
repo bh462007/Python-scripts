@@ -77,6 +77,14 @@ def login():
         
 
     return render_template("login.html")
+
+@app.route("/dashboard")
+def dashboard():
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    username = session["username"]
+    return f"Welcome to your dashboard, {username}"
         
 @app.route("/logout")
 def logout():
