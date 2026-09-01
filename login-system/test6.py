@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, session, redirect, url_for, request
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 
@@ -6,13 +6,18 @@ import os
 
 app=Flask(__name__)
 
+app.secret_key="abc"
 
 print("Current folder:", os.getcwd())
 print("Database path:", os.path.abspath("users.db"))
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return render_template(
+        "index.html",
+        logged_in=('username' in session),
+        username=session.get('username')
+    )
 
 @app.route("/register", methods=["POST", "GET"])
 def register():
@@ -58,17 +63,25 @@ def login():
         if user:
             stored_hash=user[2]
 
+            if(check_password_hash(stored_hash, password)):
+                session['username']=username
+                session.permanent=True
 
-            if check_password_hash(stored_hash,  password):
-                return f"welcome back, {user}! login successfully"
+                return redirect(url_for('home'))
             else:
                 return "Invalid password"
             
         else:
             return "user not found"
-    return render_template("login.html")
+
         
 
+    return render_template("login.html")
+        
+@app.route("/logout")
+def logout():
+    session.pop("username", None)
+    return redirect(url_for('home'))
 
 if __name__=="__main__":
     app.run(debug=True)

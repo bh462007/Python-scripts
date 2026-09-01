@@ -9,7 +9,15 @@
     <main>
         <h1>Starting today</h1>
         <h2>Creating login system and learning through project based learning</h2>
-        <a href="/register">Go to Registration Form</a>
+        
+        {% if logged_in %}
+            <p>Welcome back, <strong>{{ username }}</strong>!</p>
+            <a href="/logout">Logout</a>
+        {% else %}
+            
+            <a href="/register">Go to Registration Form</a> | 
+            <a href="/login">Login</a>
+        {% endif %}
     </main>
 </body>
 </html>
