@@ -1,6 +1,7 @@
 from flask import Flask, render_template, session, redirect, url_for, request
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
+from functools import wraps
 
 import os
 
@@ -78,13 +79,25 @@ def login():
 
     return render_template("login.html")
 
+def login_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if 'username' not in session:
+            return redirect(url_for('login'))
+        else:
+            result=func(*args, **kwargs)
+            return result
+    return wrapper
+
 @app.route("/dashboard")
+@login_required
 def dashboard():
     if "username" not in session:
         return redirect(url_for("login"))
 
     username = session["username"]
     return f"Welcome to your dashboard, {username}"
+    
         
 @app.route("/logout")
 def logout():
