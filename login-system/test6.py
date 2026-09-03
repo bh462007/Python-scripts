@@ -2,12 +2,11 @@ from flask import Flask, render_template, session, redirect, url_for, request
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 from functools import wraps
-
 import os
 
 app=Flask(__name__)
 
-app.secret_key="abc"
+app.secret_key="govr_poly"
 
 print("Current folder:", os.getcwd())
 print("Database path:", os.path.abspath("users.db"))
@@ -28,19 +27,19 @@ def register():
         hash_password=generate_password_hash(password)
 
         conn=sqlite3.connect("users.db")
-
         try: 
-            
             cursor=conn.cursor()
-
             cursor.execute("INSERT INTO users(username, password_hash) VALUES(?, ?)", (username, hash_password))
 
             conn.commit()
 
-            return "registration done successfully"
+            #create session after registration
+            session["username"]=username
+            session.permanent=True
+            return redirect(url_for("dashboard"))
 
         except sqlite3.IntegrityError as e:
-            return f"failed: {e}"
+            return f"failed: Username already exists. Please choose another username."
 
         finally: 
             conn.close()
@@ -68,15 +67,11 @@ def login():
                 session['username']=username
                 session.permanent=True
 
-                return redirect(url_for('home'))
+                return redirect(url_for("dashboard"))
             else:
                 return "Invalid password"
-            
         else:
             return "user not found"
-
-        
-
     return render_template("login.html")
 
 def login_required(func):
@@ -92,11 +87,8 @@ def login_required(func):
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    if "username" not in session:
-        return redirect(url_for("login"))
-
     username = session["username"]
-    return f"Welcome to your dashboard, {username}"
+    return render_template("dashboard.html", username=username)
     
         
 @app.route("/logout")

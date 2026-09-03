@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <title>Register</title>
 </head>
 <body>
-    <main>
-        <form method="post" action="/register">
-            <label for="user-name">Username:</label>
-            <input type="text" id="user-name" name="username" placeholder="Enter username" required>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Enter password" required>
-            <button type="submit">Submit</button>
-            <a href="/login">Have an account already?</a>
-        </form>
+    <main class="container">
+        <article style="max-width: 400px; margin: 5rem auto;">
+            <form method="post" action="/register">
+                <label for="user-name">Username:</label>
+                <input type="text" id="user-name" name="username" placeholder="Enter username" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" placeholder="Enter password" required>
+                <button type="submit">Submit</button>
+            </form>
+            <a href="/login">Have an account already? Login</a>
+        </article>
     </main>
 </body>
 </html>
