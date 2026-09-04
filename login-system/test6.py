@@ -19,12 +19,33 @@ def home():
         username=session.get('username')
     )
 
+class User:
+    def __init__(self,id, username, password_hash):
+        self.id=id
+        self.username=username
+        self.password_hash=password_hash
+    
+    @classmethod
+    def from_row(cls, row):
+        return cls(row[0],row[1],row[2])
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    @staticmethod
+    def hash_password(password):
+        return generate_password_hash(password)
+
+    @property
+    def display_name(self):
+        return self.username.capitalize()
+
 @app.route("/register", methods=["POST", "GET"])
 def register():
     if request.method=="POST":
         username=request.form["username"]
         password=request.form["password"]
-        hash_password=generate_password_hash(password)
+        hash_password=User.hash_password(password)
 
         conn=sqlite3.connect("users.db")
         try: 
@@ -61,10 +82,10 @@ def login():
         conn.close()
 
         if user:
-            stored_hash=user[2]
+            user=User.from_row(user)
 
-            if(check_password_hash(stored_hash, password)):
-                session['username']=username
+            if(user.check_password(password)):
+                session['username']=user.username
                 session.permanent=True
 
                 return redirect(url_for("dashboard"))
@@ -88,9 +109,19 @@ def login_required(func):
 @login_required
 def dashboard():
     username = session["username"]
-    return render_template("dashboard.html", username=username)
+
+    conn=sqlite3.connect("users.db")
+    cursor=conn.cursor()
+
+    cursor.execute("SELECT * FROM users WHERE username =?", (username,))
+    row=cursor.fetchone()
+
+    conn.close()
+
+    user=User.from_row(row)
+
+    return render_template("dashboard.html", username=user.display_name)
     
-        
 @app.route("/logout")
 def logout():
     session.pop("username", None)
