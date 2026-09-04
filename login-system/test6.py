@@ -36,6 +36,10 @@ class User:
     def hash_password(password):
         return generate_password_hash(password)
 
+    @staticmethod
+    def get_connection():
+        return sqlite3.connect("users.db")
+
     @property
     def display_name(self):
         return self.username.capitalize()
@@ -47,7 +51,7 @@ def register():
         password=request.form["password"]
         hash_password=User.hash_password(password)
 
-        conn=sqlite3.connect("users.db")
+        conn=User.get_connection()
         try: 
             cursor=conn.cursor()
             cursor.execute("INSERT INTO users(username, password_hash) VALUES(?, ?)", (username, hash_password))
@@ -60,7 +64,7 @@ def register():
             return redirect(url_for("dashboard"))
 
         except sqlite3.IntegrityError as e:
-            return f"failed: Username already exists. Please choose another username."
+            return render_template("register.html", error="Username already exists. Please choose another username.")
 
         finally: 
             conn.close()
@@ -73,7 +77,7 @@ def login():
         username=request.form.get("username")
         password=request.form.get("password")
 
-        conn=sqlite3.connect("users.db")
+        conn=User.get_connection()
         cursor=conn.cursor()
 
         cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
@@ -90,9 +94,9 @@ def login():
 
                 return redirect(url_for("dashboard"))
             else:
-                return "Invalid password"
+                return render_template("login.html", error="Invalid password")
         else:
-            return "user not found"
+            return render_template("login.html", error="User not found")
     return render_template("login.html")
 
 def login_required(func):
@@ -110,7 +114,7 @@ def login_required(func):
 def dashboard():
     username = session["username"]
 
-    conn=sqlite3.connect("users.db")
+    conn=User.get_connection()
     cursor=conn.cursor()
 
     cursor.execute("SELECT * FROM users WHERE username =?", (username,))

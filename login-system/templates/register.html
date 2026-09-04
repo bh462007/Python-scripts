@@ -9,6 +9,9 @@
 <body>
     <main class="container">
         <article style="max-width: 400px; margin: 5rem auto;">
+            {% if error %}
+                <p style="color: red;">{{ error }}</p>
+            {% endif %}
             <form method="post" action="/register">
                 <label for="user-name">Username:</label>
                 <input type="text" id="user-name" name="username" placeholder="Enter username" required>
