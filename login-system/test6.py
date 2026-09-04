@@ -125,6 +125,11 @@ def dashboard():
     user=User.from_row(row)
 
     return render_template("dashboard.html", username=user.display_name)
+
+@app.route("/profile")
+@login_required
+def profile():
+    return render_template("profile.html")
     
 @app.route("/logout")
 def logout():
