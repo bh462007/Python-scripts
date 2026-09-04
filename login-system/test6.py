@@ -51,23 +51,19 @@ def register():
         password=request.form["password"]
         hash_password=User.hash_password(password)
 
-        conn=User.get_connection()
         try: 
-            cursor=conn.cursor()
-            cursor.execute("INSERT INTO users(username, password_hash) VALUES(?, ?)", (username, hash_password))
-
-            conn.commit()
+            with User.get_connection() as conn:
+                cursor=conn.cursor()
+                cursor.execute("INSERT INTO users(username, password_hash) VALUES(?, ?)", (username, hash_password))
+                conn.commit()
 
             #create session after registration
             session["username"]=username
             session.permanent=True
             return redirect(url_for("dashboard"))
 
-        except sqlite3.IntegrityError as e:
+        except sqlite3.IntegrityError:
             return render_template("register.html", error="Username already exists. Please choose another username.")
-
-        finally: 
-            conn.close()
 
     return render_template("register.html")
 
@@ -77,13 +73,10 @@ def login():
         username=request.form.get("username")
         password=request.form.get("password")
 
-        conn=User.get_connection()
-        cursor=conn.cursor()
-
-        cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
-        user = cursor.fetchone()
-
-        conn.close()
+        with User.get_connection() as conn:
+            cursor=conn.cursor()
+            cursor.execute("SELECT * FROM users WHERE username=?", (username,))
+            user=cursor.fetchone()
 
         if user:
             user=User.from_row(user)
@@ -114,13 +107,14 @@ def login_required(func):
 def dashboard():
     username = session["username"]
 
-    conn=User.get_connection()
-    cursor=conn.cursor()
+    with User.get_connection() as conn:
+        cursor=conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE username=?", (username,))
+        row=cursor.fetchone()
 
-    cursor.execute("SELECT * FROM users WHERE username =?", (username,))
-    row=cursor.fetchone()
-
-    conn.close()
+    if row is None:
+        session.pop("username", None)
+        return redirect(url_for("login"))
 
     user=User.from_row(row)
 
