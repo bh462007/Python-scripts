@@ -44,18 +44,35 @@ class User:
     def display_name(self):
         return self.username.capitalize()
 
+    @classmethod
+    def find_by_username(cls, username):
+        with cls.get_connection() as conn:
+            cursor=conn.cursor()
+            cursor.execute("SELECT * FROM users WHERE username=?", (username,))
+            row=cursor.fetchone()
+        if row:
+            return cls.from_row(row)
+        return None
+
+    @classmethod
+    def create_user(cls, username, password):
+        password_hash=User.hash_password(password)
+
+        with cls.get_connection() as conn:
+            cursor=conn.cursor()
+            cursor.execute("INSERT INTO users(username, password_hash) VALUES (?, ?)", (username, password_hash))
+            conn.commit()
+            user_id=cursor.lastrowid
+        return cls(user_id, username, password_hash)
+
 @app.route("/register", methods=["POST", "GET"])
 def register():
     if request.method=="POST":
         username=request.form["username"]
         password=request.form["password"]
-        hash_password=User.hash_password(password)
-
+        
         try: 
-            with User.get_connection() as conn:
-                cursor=conn.cursor()
-                cursor.execute("INSERT INTO users(username, password_hash) VALUES(?, ?)", (username, hash_password))
-                conn.commit()
+            user=User.create_user(username, password)
 
             #create session after registration
             session["username"]=username
@@ -73,14 +90,10 @@ def login():
         username=request.form.get("username")
         password=request.form.get("password")
 
-        with User.get_connection() as conn:
-            cursor=conn.cursor()
-            cursor.execute("SELECT * FROM users WHERE username=?", (username,))
-            user=cursor.fetchone()
+        user=User.find_by_username(username)
 
         if user:
-            user=User.from_row(user)
-
+            
             if(user.check_password(password)):
                 session['username']=user.username
                 session.permanent=True
@@ -105,18 +118,11 @@ def login_required(func):
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    username = session["username"]
+    user=User.find_by_username(session["username"])
 
-    with User.get_connection() as conn:
-        cursor=conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE username=?", (username,))
-        row=cursor.fetchone()
-
-    if row is None:
+    if user is None:
         session.pop("username", None)
         return redirect(url_for("login"))
-
-    user=User.from_row(row)
 
     return render_template("dashboard.html", username=user.display_name)
 
