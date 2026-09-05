@@ -140,7 +140,9 @@ def dashboard():
 @app.route("/profile")
 @login_required
 def profile():
-    return render_template("profile.html")
+    user=User.find_by_username(session["username"])
+
+    return render_template("profile.html", username=user.username, user_id=user.id)
 
 @app.route("/change_password", methods=["GET", "POST"])
 @login_required

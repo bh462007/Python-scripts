@@ -9,6 +9,10 @@
 <body>
     <main class="container">
         <p>This is your profile page</p>
+
+        <p>Username: {{ username }}</p>
+        <p>ID: {{ user_id }}</p>
+
         {% if error %}
             <p style="color: red;">{{ error }}</p>
         {% endif %}
