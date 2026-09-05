@@ -78,8 +78,20 @@ class User:
 @app.route("/register", methods=["POST", "GET"])
 def register():
     if request.method=="POST":
-        username=request.form["username"]
-        password=request.form["password"]
+        username=request.form.get("username", "").strip()
+        password=request.form.get("password", "")
+
+        if password!=password.strip():
+            flash("Password cannot start and end with a space")
+            return redirect(url_for("register"))
+
+        if not username or not password:
+            flash("Username or password cannot be empty.")
+            return redirect(url_for("register"))
+
+        if len(password)<6:
+            flash("Password must be at least 6 characters")
+            return redirect(url_for("register"))
         
         try: 
             user=User.create_user(username, password)
@@ -98,9 +110,21 @@ def register():
 @app.route("/login", methods=["POST","GET"])
 def login():
     if request.method=="POST":
-        username=request.form.get("username")
-        password=request.form.get("password")
+        username=request.form.get("username", "").strip()
+        password=request.form.get("password", "")
 
+        if password!=password.strip():
+            flash("Password cannot start and end with a space")
+            return redirect(url_for("login"))
+
+        if not username or not password:
+            flash("Username or password cannot be empty.")
+            return redirect(url_for("login"))
+
+        if len(password)<6:
+            flash("Password must be at least 6 characters")
+            return redirect(url_for("login"))
+        
         user=User.find_by_username(username)
 
         if user:
