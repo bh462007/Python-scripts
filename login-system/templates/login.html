@@ -10,12 +10,16 @@
 
 <body>
     <main class="container">
+        {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for msg in messages %}
+                    <p style="color: red;">{{ msg }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
         <article style="max-width: 400px; margin: 5rem auto;">
             <h2>Login</h2>
 
-            {% if error %}
-                <p style="color: red;">{{ error }}</p>
-            {% endif %}
             <form action="/login" method="post">
                 <label for="user-name">Username:</label>
                 <input type="text" id="user-name" name="username" placeholder="Enter username">

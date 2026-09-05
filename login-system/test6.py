@@ -1,15 +1,17 @@
-from flask import Flask, render_template, session, redirect, url_for, request
+from flask import Flask, render_template, session, redirect, url_for, request, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 from functools import wraps
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 app=Flask(__name__)
 
-app.secret_key="govr_poly"
+app.secret_key=os.environ.get("FLASK_SECRET_KEY")
 
-print("Current folder:", os.getcwd())
-print("Database path:", os.path.abspath("users.db"))
+# print("Current folder:", os.getcwd())
+# print("Database path:", os.path.abspath("users.db"))
 
 @app.route("/")
 def home():
@@ -73,9 +75,6 @@ class User:
             cursor.execute("UPDATE users SET password_hash=? WHERE username=?", (new_password_hash, username))
             conn.commit()
 
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
-
 @app.route("/register", methods=["POST", "GET"])
 def register():
     if request.method=="POST":
@@ -91,7 +90,8 @@ def register():
             return redirect(url_for("dashboard"))
 
         except sqlite3.IntegrityError:
-            return render_template("register.html", error="Username already exists. Please choose another username.")
+            flash("Username already exists. Please choose another username.")
+            return redirect(url_for("register"))
 
     return render_template("register.html")
 
@@ -111,9 +111,11 @@ def login():
 
                 return redirect(url_for("dashboard"))
             else:
-                return render_template("login.html", error="Invalid password")
+                flash("Invalid password")
+                return redirect(url_for("login"))
         else:
-            return render_template("login.html", error="User not found")
+            flash("User not found")
+            return redirect(url_for("login"))
     return render_template("login.html")
 
 def login_required(func):
@@ -158,13 +160,17 @@ def change_password():
         if user.check_password(old_password):
             if new_password == confirm_password:
                 User.update_password(username, new_password)
-                return render_template("profile.html", success="Password updated successfully")
+
+                flash("Password updated successfully")
+                return redirect(url_for("profile"))
     
             else:
-                return render_template("profile.html", error="New password do not match")
+                flash("New password do not match")
+                return redirect(url_for("profile"))
         else:
-            return render_template("profile.html", error="Old password is incorrect")
-    return render_template("profile.html")
+            flash("Old password is incorrect")
+            return redirect(url_for("profile"))
+    return redirect(url_for("profile"))
         
 @app.route("/logout")
 def logout():

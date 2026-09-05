@@ -8,14 +8,20 @@
 </head>
 <body>
     <main class="container">
+
+        {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for msg in messages %}
+                    <p style="color: red;">{{ msg }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
         <p>This is your profile page</p>
 
         <p>Username: {{ username }}</p>
         <p>ID: {{ user_id }}</p>
 
-        {% if error %}
-            <p style="color: red;">{{ error }}</p>
-        {% endif %}
         
         <form action="/change_password" method="POST">
             <label for="password">Old password</label>
@@ -27,9 +33,7 @@
             <button type="submit">Change password</button>
         </form>
 
-        {% if success %}
-            <p style="color: green;">{{ success }}</p>
-        {% endif %}
+        
     </main>
 </body>
 </html>
