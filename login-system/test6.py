@@ -65,6 +65,17 @@ class User:
             user_id=cursor.lastrowid
         return cls(user_id, username, password_hash)
 
+    @classmethod
+    def update_password(cls, username, new_password):
+        new_password_hash=User.hash_password(new_password)
+        with cls.get_connection() as conn:
+            cursor=conn.cursor()
+            cursor.execute("UPDATE users SET password_hash=? WHERE username=?", (new_password_hash, username))
+            conn.commit()
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
 @app.route("/register", methods=["POST", "GET"])
 def register():
     if request.method=="POST":
@@ -130,7 +141,29 @@ def dashboard():
 @login_required
 def profile():
     return render_template("profile.html")
+
+@app.route("/change_password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    if request.method=="POST":
+        old_password=request.form.get("password")
+        new_password=request.form.get("new-password")
+        confirm_password=request.form.get("check-new-password")
+
+        username=session["username"]
+        user=User.find_by_username(username)
+
+        if user.check_password(old_password):
+            if new_password == confirm_password:
+                User.update_password(username, new_password)
+                return render_template("profile.html", success="Password updated successfully")
     
+            else:
+                return render_template("profile.html", error="New password do not match")
+        else:
+            return render_template("profile.html", error="Old password is incorrect")
+    return render_template("profile.html")
+        
 @app.route("/logout")
 def logout():
     session.pop("username", None)

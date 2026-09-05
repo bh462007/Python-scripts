@@ -9,6 +9,23 @@
 <body>
     <main class="container">
         <p>This is your profile page</p>
+        {% if error %}
+            <p style="color: red;">{{ error }}</p>
+        {% endif %}
+        
+        <form action="/change_password" method="POST">
+            <label for="password">Old password</label>
+            <input type="password" id="password" name="password" placeholder="Enter old password" required>
+            <label for="new-password">New password</label>
+            <input type="password" id="new-password" name="new-password" placeholder="Enter new password" required>
+            <label for="check-new-password">Confirm new password</label>
+            <input type="password" id="check-new-password" name="check-new-password" placeholder="Confirm password" required>
+            <button type="submit">Change password</button>
+        </form>
+
+        {% if success %}
+            <p style="color: green;">{{ success }}</p>
+        {% endif %}
     </main>
 </body>
 </html>
