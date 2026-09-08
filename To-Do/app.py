@@ -87,6 +87,68 @@ class User:
 
             conn.commit()
 
+# ---------------- TASK ----------------
+class Task:
+
+    @staticmethod
+    def get_connection():
+        return sqlite3.connect("users.db")
+
+    @classmethod
+    def add_task(cls, user_id, task_name, description, start, end, priority):
+        with cls.get_connection() as conn:
+            cursor=conn.cursor()
+            cursor.exceute("INSERT INTO tasks(task_name, description, start,end, priority, user_id) VALUES (?,?,?,?,?,?)", (task_name, description, start,end, priority, user_id))
+            conn.commit()
+
+    @classmethod
+    def get_task(cls, user_id, status=None, priority=None):
+        query="SELECT * FROM tasks WHERE user_id=?"
+        params=[user_id]
+
+        if status is not None:
+            query+=" AND status=?"
+            params.append(status)
+
+        if priority is not None:
+            query+=" AND priority=?"
+            params.append(priority)
+
+        with cls.get_connection() as conn:
+            cursor=conn.cursor();
+            cursor.execute(query,params)
+            rows=cursor.fetchall()
+
+        return rows
+
+    @classmethod
+    def remove_task(cls, task_id, user_id):
+        with cls.get_connection() as conn:
+            cursor=conn.cursor()
+            cursor.execute("DELETE FROM tasks WHERE task_id=? AND user_id=?", (task_id, user_id))
+            conn.commit()
+
+    @classmethod
+    def update_task(cls, task_id, user_id, **fields):
+
+        set_clause = ", ".join(
+            field + " = ?" for field in fields
+        )
+
+        params = list(fields.values())
+        params.extend([task_id, user_id])
+
+        query = f"""
+            UPDATE tasks
+            SET {set_clause}
+            WHERE task_id = ? AND user_id = ?
+        """
+
+        with cls.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(query, params)
+            conn.commit()
+
 
 # ---------------- REGISTER ----------------
 
