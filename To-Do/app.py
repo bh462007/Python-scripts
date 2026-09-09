@@ -98,11 +98,11 @@ class Task:
     def add_task(cls, user_id, task_name, description, start, end, priority):
         with cls.get_connection() as conn:
             cursor=conn.cursor()
-            cursor.exceute("INSERT INTO tasks(task_name, description, start,end, priority, user_id) VALUES (?,?,?,?,?,?)", (task_name, description, start,end, priority, user_id))
+            cursor.execute("INSERT INTO tasks(task_name, description, start,end, priority, user_id) VALUES (?,?,?,?,?,?)", (task_name, description, start,end, priority, user_id))
             conn.commit()
 
     @classmethod
-    def get_task(cls, user_id, status=None, priority=None):
+    def get_tasks(cls, user_id, status=None, priority=None):
         query="SELECT * FROM tasks WHERE user_id=?"
         params=[user_id]
 
@@ -119,6 +119,15 @@ class Task:
             cursor.execute(query,params)
             rows=cursor.fetchall()
 
+        return rows
+
+    @classmethod
+    def get_task(cls, task_id, user_id):
+        
+        with cls.get_connection() as conn:
+            cursor=conn.cursor()
+            cursor.execute("SELECT * FROM tasks WHERE user_id=? AND task_id=?",(user_id, task_id))
+            rows=cursor.fetchone()
         return rows
 
     @classmethod
@@ -177,10 +186,11 @@ def register():
 
         try:
 
-            User.create_user(username, password)
+            user=User.create_user(username, password)
 
             # Login user automatically after registration
-            session["username"] = username
+            session["user_id"]=user.user_id
+            session["username"] = user.username
             session.permanent = True
 
             return redirect(url_for("dashboard"))
@@ -220,6 +230,7 @@ def login():
             if user.check_password(password):
 
                 session["username"] = user.username
+                session["user_id"]= user.user_id
                 session.permanent = True
 
                 return redirect(url_for("dashboard"))
@@ -342,14 +353,28 @@ def change_password():
 
     return redirect(url_for("profile"))
 
+# ---------------- TASKS ----------------
+@app.route("/tasks")
+@login_required
+def tasks():
+    user_id=session["user_id"]
+
+    tasks=Task.get_tasks(user_id)
+
+    return render_template("tasks.html", tasks=tasks)
+
+# ---------------- TASKS ----------------
+@app.route("/add_task")
+@login_required
+def add_task():
+    return render_template("add_task.html")
 
 # ---------------- LOGOUT ----------------
 
 @app.route("/logout")
 def logout():
 
-    session.pop("username", None)
-
+    session.clear()
     return redirect(url_for("login"))
 
 
