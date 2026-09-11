@@ -2,6 +2,7 @@ from flask import Flask, render_template, session, url_for, request, flash, redi
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from functools import wraps
+from datetime import datetime
 import sqlite3
 import os
 
@@ -115,7 +116,7 @@ class Task:
             params.append(priority)
 
         with cls.get_connection() as conn:
-            cursor=conn.cursor();
+            cursor=conn.cursor()
             cursor.execute(query,params)
             rows=cursor.fetchall()
 
@@ -364,9 +365,53 @@ def tasks():
     return render_template("tasks.html", tasks=tasks)
 
 # ---------------- TASKS ----------------
-@app.route("/add_task")
+@app.route("/add_task", methods=["GET", "POST"])
 @login_required
 def add_task():
+    if request.method=="POST":
+        task_name=request.form.get("task_name","").strip()
+        description=request.form.get("description","").strip()
+        start=request.form.get("start","")
+        end=request.form.get("end","")
+        priority=request.form.get("priority","")
+        allowed_priorities={"Low", "Medium", "High"}
+
+        start_time=datetime.strptime(start, "%Y-%m-%dT%H:%M")
+        end_time=datetime.strptime(end, "%Y-%m-%dT%H:%M")
+        
+        if not task_name:
+            flash("Task must have a name")
+            return redirect(url_for("add_task"))
+
+        if len(task_name)>100:
+            flash("Task name must be less than 100 characters")
+            return redirect(url_for("add_task"))
+
+        if len(description)>1000:
+            flash("Description is too long")
+            return redirect(url_for("add_task"))
+
+        if not start:
+            flash("Start  date and time are required")
+            return redirect(url_for("add_task"))
+
+        if not end:
+            flash("End date and time are required")
+            return redirect(url_for("add_task"))
+
+        if priority not in allowed_priorities:
+            flash("Invalid priority")
+            return redirect(url_for("add_task"))
+
+        if end_time<=start_time:
+            flash("End date and time must be after start date and time")
+            return redirect(url_for("add_task"))
+
+        user_id=session["user_id"]
+        
+        Task.add_task(user_id, task_name, description, start, end, priority)
+        return redirect(url_for("tasks"))
+
     return render_template("add_task.html")
 
 # ---------------- LOGOUT ----------------
