@@ -364,7 +364,7 @@ def tasks():
 
     return render_template("tasks.html", tasks=tasks)
 
-# ---------------- TASKS ----------------
+# ---------------- ADD TASKS ----------------
 @app.route("/add_task", methods=["GET", "POST"])
 @login_required
 def add_task():
@@ -376,9 +376,6 @@ def add_task():
         priority=request.form.get("priority","")
         allowed_priorities={"Low", "Medium", "High"}
 
-        start_time=datetime.strptime(start, "%Y-%m-%dT%H:%M")
-        end_time=datetime.strptime(end, "%Y-%m-%dT%H:%M")
-        
         if not task_name:
             flash("Task must have a name")
             return redirect(url_for("add_task"))
@@ -403,8 +400,11 @@ def add_task():
             flash("Invalid priority")
             return redirect(url_for("add_task"))
 
+        start_time=datetime.strptime(start, "%Y-%m-%dT%H:%M")
+        end_time=datetime.strptime(end, "%Y-%m-%dT%H:%M")
+
         if end_time<=start_time:
-            flash("End date and time must be after start date and time")
+            flash("Oops! Please make sure your end time comes after your start time")
             return redirect(url_for("add_task"))
 
         user_id=session["user_id"]
@@ -413,6 +413,17 @@ def add_task():
         return redirect(url_for("tasks"))
 
     return render_template("add_task.html")
+
+# ---------------- DELETE TASKS ----------------
+@app.route("/tasks/<int:task_id>/delete", methods=["POST"])
+@login_required
+def delete_task(task_id):
+    user_id=session["user_id"]
+    
+    Task.remove_task(task_id, user_id)
+
+    flash("Task deleted successfully")
+    return redirect(url_for("tasks"))
 
 # ---------------- LOGOUT ----------------
 
