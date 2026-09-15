@@ -1,79 +1,83 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>My Tasks</title>
 
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
-    >
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
 </head>
 
 <body>
 
     <main class="container">
 
-        <h1>My Tasks</h1>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <p style="color: green;">{{ message }}</p>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
 
-        <a href="{{ url_for('add_task') }}">Add New Task</a>
-        <br><br>
+        <h1>My Tasks</h1>
 
         {% if tasks %}
 
-            {% for task in tasks %}
+        {% for task in tasks %}
 
-                <article style="position: relative;">
+        <article style="position: relative;">
 
-                    <form 
-                        action="{{ url_for('delete_task', task_id=task[0]) }}"
-                        method="post"
-                        style="position: absolute; top: 1rem; right: 1rem;">
-                        
-                        <button type="submit">Delete</button>
-                    </form>
+            <div style="position: absolute; top: 1rem; right: 1rem;">
 
-                    <h3>{{ task[1] }}</h3>
+                <a href="{{ url_for('edit_task', task_id=task[0]) }}">
+                    Edit
+                </a>
 
-                    <p>
-                        <strong>Description:</strong>
-                        {{ task[2] }}
-                    </p>
+                <form action="{{ url_for('delete_task', task_id=task[0]) }}" method="post"
+                    style="display: inline; margin-left: 1rem;">
+                    <button type="submit">
+                        Delete
+                    </button>
+                </form>
 
-                    <p>
-                        <strong>Start:</strong>
-                        {{ task[3] }}
-                    </p>
+            </div>
 
-                    <p>
-                        <strong>End:</strong>
-                        {{ task[4] }}
-                    </p>
+            <h3>{{ task[1] }}</h3>
 
-                    <p>
-                        <strong>Status:</strong>
-                        {{ task[5] }}
-                    </p>
+            <p>
+                <strong>Description:</strong>
+                {{ task[2] }}
+            </p>
 
-                    <p>
-                        <strong>Priority:</strong>
-                        {{ task[6] }}
-                    </p>
+            <p>
+                <strong>Start:</strong>
+                {{ task[3] }}
+            </p>
 
-                </article>
+            <p>
+                <strong>End:</strong>
+                {{ task[4] }}
+            </p>
 
-            {% endfor %}
+            <p>
+                <strong>Priority:</strong>
+                {{ task[6] }}
+            </p>
+
+        </article>
+
+        {% endfor %}
 
         {% else %}
 
-            <p>You don't have any tasks yet.</p>
+        <p>You don't have any tasks yet.</p>
 
-            <a href="{{ url_for('add_task') }}">
-                Create your first task
-            </a>
+        <a href="{{ url_for('add_task') }}">
+            Create your first task
+        </a>
 
         {% endif %}
 
@@ -86,4 +90,5 @@
     </main>
 
 </body>
+
 </html>

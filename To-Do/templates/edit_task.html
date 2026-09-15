@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Task</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+</head>
+
+<body>
+
+    <main class="container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <p style="color: green;">{{ message }}</p>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <h1>Edit Task</h1>
+
+        <form method="post">
+
+            <label for="task_name">
+                Task Name
+                <input type="text" id="task_name" name="task_name" value="{{ task[1] }}" required>
+            </label>
+
+            <label for="description">
+                Description
+                <textarea id="description" name="description">{{ task[2] }}</textarea>
+            </label>
+
+            <label for="start">
+                Start
+                <input type="datetime-local" id="start" name="start" value="{{ task[3] }}" required>
+            </label>
+
+            <label for="end">
+                End
+                <input type="datetime-local" id="end" name="end" value="{{ task[4] }}" required>
+            </label>
+
+            <label for="priority">
+                Priority
+                <select id="priority" name="priority" required>
+
+                    <option value="Low" {% if task[6]=="Low" %}selected{% endif %}>
+                        Low
+                    </option>
+
+                    <option value="Medium" {% if task[6]=="Medium" %}selected{% endif %}>
+                        Medium
+                    </option>
+
+                    <option value="High" {% if task[6]=="High" %}selected{% endif %}>
+                        High
+                    </option>
+
+                </select>
+            </label>
+
+            <button type="submit">
+                Save Changes
+            </button>
+
+            <a href="{{ url_for('tasks') }}">
+                Cancel
+            </a>
+
+        </form>
+
+    </main>
+
+</body>
+
+</html>
