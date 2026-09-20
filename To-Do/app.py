@@ -472,7 +472,7 @@ def add_task():
 
             flash("A task with this name already exists!")
 
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("add_task"))
 
         if len(task_name) > 100:
 
