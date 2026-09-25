@@ -17,5 +17,5 @@ def read_item(item_id: int):
     return {"item_id":item_id, "item_name":items_list[item_id]}
 
 @app.get("/items")
-def read_item():
-    return items_list
+def read_item(skip:int=1, limit:int=2):
+    return items_list[skip : skip+limit]
