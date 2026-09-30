@@ -32,3 +32,9 @@ print("\n", df.dtypes)
 
 print("\n", df.isnull())
 print("\n", df.isnull().sum())
+
+print("\n", df.groupby("vendor")["amount"].sum())
+
+print("\n", df.groupby("vendor")["amount"].agg(["sum", "count"]))
+
+print("\n", df.to_csv("cleansed_invoice.csv", index=False))
