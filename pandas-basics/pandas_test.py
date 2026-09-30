@@ -17,3 +17,9 @@ print("\n", df[df["amount"]>4000])
 print("\n",df[df["vendor"] == "ABC Ltd"])
 
 print("\n",df[(df["vendor"] == "ABC Ltd") & (df["amount"]>4000)] )
+
+df["vendor"] = df["vendor"].str.strip()
+print("\n",df)
+
+df["vendor"] = df["vendor"].str.lower()
+print("\n", df)
