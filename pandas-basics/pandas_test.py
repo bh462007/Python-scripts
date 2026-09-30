@@ -29,3 +29,6 @@ df = pd.read_csv("invoices.csv")
 df["date"]=pd.to_datetime(df["date"], dayfirst=True)
 print("\n", df)
 print("\n", df.dtypes)
+
+print("\n", df.isnull())
+print("\n", df.isnull().sum())
