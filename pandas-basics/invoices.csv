@@ -1,4 +1,4 @@
-invoice_id,vendor,amount
-INV001,ABC Ltd,5000
-INV002,XYZ Ltd,3200
-INV003,ABC Ltd,7000
+invoice_id,vendor,amount,date
+INV001,ABC Ltd,5000,20/09/2026
+INV002,XYZ Ltd,3200,21/09/2026
+INV003,ABC Ltd,7000,22/09/2026
