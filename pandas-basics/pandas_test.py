@@ -8,4 +8,12 @@ import pandas as pd
 
 df=pd.read_csv("invoices.csv")
 
-print(df)
+print(df["vendor"])
+
+print("\n",df[["invoice_id", "amount"]])
+
+print("\n", df[df["amount"]>4000])
+
+print("\n",df[df["vendor"] == "ABC Ltd"])
+
+print("\n",df[(df["vendor"] == "ABC Ltd") & (df["amount"]>4000)] )
